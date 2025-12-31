@@ -1,4 +1,21 @@
-.corner-box {
+.corner-box-w {
+    padding: 2rem;
+    background:
+        linear-gradient(var(--white-color)) top right,
+        linear-gradient(var(--white-color)) top right,
+        linear-gradient(var(--white-color)) top left,
+        linear-gradient(var(--white-color)) top left,
+
+        linear-gradient(var(--white-color)) bottom left,
+        linear-gradient(var(--white-color)) bottom left,
+        linear-gradient(var(--white-color)) bottom right,
+        linear-gradient(var(--white-color)) bottom right;
+
+    background-size: 20px 2px, 2px 20px;
+    background-repeat: no-repeat;
+}
+
+.corner-box-b {
     padding: 2rem;
     background:
         linear-gradient(var(--black-color)) top right,
@@ -30,7 +47,6 @@
 
     background-size: 10px 2px, 2px 10px;
     background-repeat: no-repeat;
-    font-size: var(--fs-20);
 }
 
 .cross-box {

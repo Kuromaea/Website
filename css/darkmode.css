@@ -1,11 +1,6 @@
 /* =========================================================
    DARK MODE (toggle)
    ========================================================= */
-
-svg.logo path {
-    fill: var(--black-color) !important;
-}
-
 .theme-toggle {
     appearance: none;
     background: transparent;
