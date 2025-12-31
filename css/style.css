@@ -40,14 +40,6 @@ hr {
     padding: 5px;
 }
 
-body.no-scroll-page,
-html:has(body.no-scroll-page) {
-    height: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
-    touch-action: none;
-}
-
 /* Custom cursor */
 .custom-cursor {
     position: fixed;

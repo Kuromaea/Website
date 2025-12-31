@@ -1,9 +1,7 @@
 // Always unlock scroll on each page load (safety)
 // BUT keep scroll locked on pages that explicitly disable it (e.g. Home)
-if (!document.body.classList.contains("no-scroll-page")) {
-  document.documentElement.style.overflow = "";
-  document.body.style.overflow = "";
-}
+document.documentElement.style.overflow = "";
+document.body.style.overflow = "";
 
 if (window.gsap) {
   gsap.registerPlugin(window.ScrollTrigger, window.ScrambleTextPlugin, window.SplitText);
@@ -62,11 +60,8 @@ if (window.gsap) {
     loader.remove();
     document.body.classList.remove("is-loading");
 
-    if (!document.body.classList.contains("no-scroll-page")) {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-    }
-
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
 
     // If you still fade-in your page via CSS (body.is-loading), force visible:
     gsap.set(["header", "main", "footer"], { opacity: 1 });
@@ -129,10 +124,10 @@ if (window.gsap) {
       onComplete: () => {
         loader.remove();
         document.body.classList.remove("is-loading");
-        if (!document.body.classList.contains("no-scroll-page")) {
-          document.documentElement.style.overflow = "";
-          document.body.style.overflow = "";
-        }
+
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+
       }
     });
 
@@ -186,10 +181,10 @@ if (window.gsap) {
     // -----------------------
     // OUT (on arrival)
     // -----------------------
-    if (!document.body.classList.contains("no-scroll-page")) {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-    }
+
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+
 
     if (sessionStorage.getItem(KEY) === "1") {
       sessionStorage.removeItem(KEY);
@@ -208,11 +203,9 @@ if (window.gsap) {
       gsap.set(overlay, { yPercent: 0 });
 
       gsap.delayedCall(HOLD_ON_ARRIVAL, () => {
-        if (!document.body.classList.contains("no-scroll-page")) {
-          document.documentElement.style.overflow = "";
-          document.body.style.overflow = "";
-        }
 
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
 
         gsap.to(overlay, {
           yPercent: 100,
@@ -349,11 +342,8 @@ if (window.gsap) {
   }
 
   window.addEventListener("pagehide", () => {
-    if (!document.body.classList.contains("no-scroll-page")) {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-    }
-
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
   });
 
 })();
