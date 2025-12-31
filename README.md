@@ -27,3 +27,13 @@ this site is still compatible because internal links/assets use **relative paths
 ## Post-deploy checklist
 - Update `robots.txt` + `sitemap.xml` with your real URL (replace `YOUR-USERNAME`).
 - Verify navigation between pages + dark mode + transitions.
+
+
+**Affichage en darkmode directement la 1er fois désactiver cela que sa s'affiche clair et si on souhaite mettre en darkmode** = ✅
+**régler le header car sur version mobile il remonter et par hors ecran evite rcela avec l'animation gsap** = ✅
+**Remettre le logo en blanc sur la page index.html**
+**Ajouter de l'espace entre les social-row et le main sur les pages**
+**responsive encore plus les social-row pour qu'elle s'affiche en plus petit**
+**Faire que le scroll arrow apparaisse une fois pour indiquer que l'on peut scroll mais ne réapparait pas quand on scroll vers le haut**
+**remettre les informations de la card dans la page about à gauche au lieu de centré**
+**connect with me l'agrandire un peu plus et réduire le bouton**

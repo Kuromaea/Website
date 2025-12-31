@@ -23,13 +23,16 @@
     <script>
         (() => {
             try {
-                const saved = localStorage.getItem("theme"); // "dark" | "light" | null
-                const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-                const theme = saved || (prefersDark ? "dark" : "light");
-                if (theme === "dark") document.documentElement.setAttribute("data-theme", "dark");
+                const saved = localStorage.getItem("theme");
+                if (saved === "dark") {
+                    document.documentElement.setAttribute("data-theme", "dark");
+                } else {
+                    document.documentElement.removeAttribute("data-theme");
+                }
             } catch (e) { }
         })();
     </script>
+
 
     <link rel="stylesheet" href="./css/style.css" />
 </head>
@@ -67,17 +70,8 @@
             <span class="bar"></span>
         </button>
 
-        <nav class="navigation-bar" aria-label="Main navigation">
-            <ul id="nav-menu" class="nav-menu">
-                <li><a href="./index.html" class="cool-link" aria-current="page">Home</a></li>
-                <li><a href="./pages/work.html" class="cool-link">Work</a></li>
-                <li><a href="./pages/about.html" class="cool-link">About</a></li>
-                <li><a href="./pages/contact.html" class="cool-link">Contact</a></li>
-            </ul>
-        </nav>
-
-        <button class="theme-toggle" type="button" aria-label="Dark mode activated" aria-pressed="false">
-            <span class="theme-toggle__icon" aria-hidden="true">✱</span>
+        <button class="theme-toggle" type="button" aria-pressed="false">
+            <span class="theme-toggle__icon">☾</span>
         </button>
 
         <div class="head-description">
@@ -171,6 +165,15 @@
             <span>© 2026</span>
         </nav>
     </footer>
+
+    <nav class="navigation-bar" aria-label="Main navigation">
+        <ul id="nav-menu" class="nav-menu">
+            <li><a href="./index.html" class="cool-link" aria-current="page">Home</a></li>
+            <li><a href="./pages/work.html" class="cool-link">Work</a></li>
+            <li><a href="./pages/about.html" class="cool-link">About</a></li>
+            <li><a href="./pages/contact.html" class="cool-link">Contact</a></li>
+        </ul>
+    </nav>
 
     <div class="custom-cursor">✱</div>
 

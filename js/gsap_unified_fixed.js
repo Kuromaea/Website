@@ -7,14 +7,15 @@ if (window.gsap) {
 }
 
 // ===============================
-// DARK MODE TOGGLE (persist + system preference)
+// DARK MODE TOGGLE (persist only)
+// First visit is ALWAYS light. Dark mode is enabled only after user action.
 // ===============================
 (() => {
   const root = document.documentElement;
   const btn = document.querySelector(".theme-toggle");
   if (!btn) return;
 
-  const icon = btn.querySelector(".theme-toggle__icon");
+  const icon = btn.querySelector(".theme-toggle__icon") || btn;
 
   const apply = (theme) => {
     if (theme === "dark") {
@@ -30,14 +31,10 @@ if (window.gsap) {
     }
   };
 
-  // 1) priorité au choix utilisateur
+  // First visit: default to light.
+  // Only apply dark if the user explicitly chose it before.
   const saved = localStorage.getItem("theme"); // "dark" | "light" | null
-
-  // 2) sinon préférence système
-  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const initial = saved || (prefersDark ? "dark" : "light");
-
-  apply(initial);
+  apply(saved === "dark" ? "dark" : "light");
 
   btn.addEventListener("click", () => {
     const isDark = root.getAttribute("data-theme") === "dark";
@@ -46,6 +43,7 @@ if (window.gsap) {
     apply(next);
   });
 })();
+
 
 // ===============================
 // PRELOADER (CINEMATIC SLOW + RUN ONCE PER SESSION)
@@ -773,136 +771,168 @@ if (scrollIndicator) {
 // GSAP SCROLL TRIGGER
 // ===============================
 (() => {
-  // ---------------------------------
-  // Header / Footer: show-hide on scroll (SMOOTH + LIGHT)
-  // ---------------------------------
-  const header = document.querySelector(".header-container");
-  const footer = document.querySelector(".footer-wrapper");
+  (() => {
+    // ---------------------------------
+    // Header / Footer: show-hide on scroll (MOBILE FRIENDLY)
+    // - First visit: header visible
+    // - Scroll down: header hides
+    // - Scroll up: header shows immediately (natural)
+    // ---------------------------------
+    const header = document.querySelector(".header-container");
+    const footer = document.querySelector(".footer-wrapper");
 
-  if (footer) {
-    footer.classList.add("no-anim");
-    footer.style.bottom = "-120px";
-    requestAnimationFrame(() => footer.classList.remove("no-anim"));
-  }
+    const isScrollable = () =>
+      document.documentElement.scrollHeight > window.innerHeight + 2;
 
-  const isScrollable = () =>
-    document.documentElement.scrollHeight > window.innerHeight + 2;
+    // Footer initial mode (kept from your logic)
+    const applyFooterMode = () => {
+      if (!footer) return;
 
-  const applyFooterMode = () => {
-    if (!footer) return;
+      if (!isScrollable()) {
+        gsap.set(footer, { bottom: 0 });
+      } else {
+        gsap.set(footer, { bottom: -120 });
+      }
+    };
 
-    // If no scroll: show footer and keep it there
-    if (!isScrollable()) {
-      gsap.set(footer, { bottom: 0 });
-    } else {
-      // If scrollable: start hidden until user scrolls
-      gsap.set(footer, { bottom: -120 });
+    applyFooterMode();
+    window.addEventListener("load", applyFooterMode);
+    window.addEventListener("resize", applyFooterMode);
+
+    // ✅ Prefer transform animation instead of "top" (avoids mobile address bar issues)
+    if (header) {
+      gsap.set(header, { yPercent: 0, willChange: "transform" });
     }
-  };
 
-  applyFooterMode();
-  window.addEventListener("load", applyFooterMode);
-  window.addEventListener("resize", applyFooterMode);
+    const showHeader = header
+      ? gsap.quickTo(header, "yPercent", { duration: 1, ease: "power2.out" })
+      : null;
 
-  const setHeaderTop = header
-    ? gsap.quickTo(header, "top", { duration: 0.35, ease: "power2.out" })
-    : null;
+    const hideHeader = () => showHeader && showHeader(-110); // -110% hides regardless of header height
+    const revealHeader = () => showHeader && showHeader(0);
 
-  const setFooterBottom = footer
-    ? gsap.quickTo(footer, "bottom", { duration: 0.8, ease: "power2.out" })
-    : null;
+    const setFooterBottom = footer
+      ? gsap.quickTo(footer, "bottom", { duration: 0.6, ease: "power2.out" })
+      : null;
 
-  let lastY = window.scrollY;
-  let ticking = false;
+    let lastY = window.scrollY;
+    let ticking = false;
+    let lastDir = 0; // 1 = down, -1 = up
 
-  const updateChrome = () => {
-    if (!isScrollable()) return;
-    ticking = false;
+    const updateChrome = () => {
+      ticking = false;
+      if (!isScrollable()) return;
 
-    const y = window.scrollY;
-    const delta = y - lastY;
+      const y = window.scrollY;
+      const delta = y - lastY;
 
-    if (Math.abs(delta) < 6) return;
-
-    const scrollingUp = delta < 0;
-
-    if (setHeaderTop) setHeaderTop(scrollingUp ? 0 : -100);
-    if (setFooterBottom) setFooterBottom(scrollingUp ? -120 : 0);
-
-    lastY = y;
-  };
-
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(updateChrome);
+      if (document.body.classList.contains("nav-open")) {
+        revealHeader();
+        return;
       }
-    },
-    { passive: true }
-  );
 
-  // ABOUT + scrolltrigger parts require the plugin
-  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
-
-
-  // About Text
-  gsap.registerPlugin(ScrollTrigger);
-
-  const aboutTextSection = document.querySelector(".js-about-text");
-  if (aboutTextSection) {
-    const lines = aboutTextSection.querySelectorAll(".text");
-
-    gsap.set(lines, { backgroundSize: "0% 100%" });
-
-    gsap.to(lines, {
-      backgroundSize: "100% 100%",
-      ease: "power2.out",
-      duration: 1,
-      stagger: 0.16,
-      scrollTrigger: {
-        trigger: aboutTextSection,
-        start: "top 30%",
-        once: true,
-        invalidateOnRefresh: true,
-        toggleActions: "play none none none",
-        // markers: true,
+      // ✅ Always show header near the very top (more natural)
+      if (y <= 10) {
+        revealHeader();
+        if (setFooterBottom) setFooterBottom(-120);
+        lastY = y;
+        lastDir = 0;
+        return;
       }
+
+      // Ignore tiny jitter (but keep it small for mobile)
+      if (Math.abs(delta) < 2) return;
+
+      const dir = delta > 0 ? 1 : -1;
+
+      // ✅ Key fix: trigger on direction change (header shows as soon as user scrolls up)
+      if (dir !== lastDir) {
+        lastDir = dir;
+
+        if (dir === 1) {
+          hideHeader();
+          if (setFooterBottom) setFooterBottom(0);
+        } else {
+          revealHeader();
+          if (setFooterBottom) setFooterBottom(-120);
+        }
+      }
+
+      lastY = y;
+    };
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(updateChrome);
+        }
+      },
+      { passive: true }
+    );
+
+    // ABOUT + scrolltrigger parts require the plugin
+    if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    // About Text
+    gsap.registerPlugin(ScrollTrigger);
+
+    const aboutTextSection = document.querySelector(".js-about-text");
+    if (aboutTextSection) {
+      const lines = aboutTextSection.querySelectorAll(".text");
+
+      gsap.set(lines, { backgroundSize: "0% 100%" });
+
+      gsap.to(lines, {
+        backgroundSize: "100% 100%",
+        ease: "power2.out",
+        duration: 1,
+        stagger: 0.16,
+        scrollTrigger: {
+          trigger: aboutTextSection,
+          start: "top 30%",
+          once: true,
+          invalidateOnRefresh: true,
+          toggleActions: "play none none none",
+          // markers: true,
+        }
+      });
+
+    }
+
+    // About card
+    gsap.utils.toArray(".js-profile-card").forEach((card) => {
+      const img = card.querySelector(".profile-card__img");
+      const content = card.querySelector(".profile-card__content");
+
+      gsap.set(card, { opacity: 0, y: 40 });
+      if (img) gsap.set(img, { x: -30, opacity: 0 });
+      if (content) gsap.set(content, { x: 30, opacity: 0 });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: card,
+          start: "top 70%",
+          end: "+=260",
+          scrub: true,
+          invalidateOnRefresh: true,
+          once: true,
+          // markers: true,
+        },
+      })
+        .to(card, { opacity: 1, y: 0, ease: "none" }, 0)
+        .to(img, { x: 0, opacity: 1, ease: "none" }, 0)
+        .to(content, { x: 0, opacity: 1, ease: "none" }, 0)
+      // .to(img, { filter: "grayscale(0%)", ease: "none" }, 0);
     });
 
-  }
-
-  // About card
-  gsap.utils.toArray(".js-profile-card").forEach((card) => {
-    const img = card.querySelector(".profile-card__img");
-    const content = card.querySelector(".profile-card__content");
-
-    gsap.set(card, { opacity: 0, y: 40 });
-    if (img) gsap.set(img, { x: -30, opacity: 0 });
-    if (content) gsap.set(content, { x: 30, opacity: 0 });
-
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: card,
-        start: "top 70%",
-        end: "+=260",
-        scrub: true,
-        invalidateOnRefresh: true,
-        once: true,
-        // markers: true,
-      },
-    })
-      .to(card, { opacity: 1, y: 0, ease: "none" }, 0)
-      .to(img, { x: 0, opacity: 1, ease: "none" }, 0)
-      .to(content, { x: 0, opacity: 1, ease: "none" }, 0)
-    // .to(img, { filter: "grayscale(0%)", ease: "none" }, 0);
-  });
-
-  window.addEventListener("load", () => {
-    ScrollTrigger.refresh();
-    gsap.delayedCall(0.25, () => ScrollTrigger.refresh());
-  });
+    window.addEventListener("load", () => {
+      ScrollTrigger.refresh();
+      gsap.delayedCall(0.25, () => ScrollTrigger.refresh());
+    });
+  })();
 })();
 
 // ===============================
@@ -911,24 +941,38 @@ if (scrollIndicator) {
 (() => {
   const btn = document.querySelector(".nav-toggle");
   const menu = document.querySelector("#nav-menu");
+  const header = document.querySelector(".header-container");
   if (!btn || !menu) return;
 
   const setOpen = (open) => {
     document.body.classList.toggle("nav-open", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
     btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+
+    if (header && typeof gsap !== "undefined") {
+      gsap.killTweensOf(header);
+
+      if (open) {
+
+        gsap.set(header, { yPercent: 0 });
+        gsap.set(header, { clearProps: "transform" });
+      } else {
+
+        gsap.set(header, { yPercent: 0 });
+      }
+    }
   };
 
   btn.addEventListener("click", () => {
     setOpen(!document.body.classList.contains("nav-open"));
   });
 
-  // ferme quand on clique un lien
+
   menu.addEventListener("click", (e) => {
     if (e.target.closest("a")) setOpen(false);
   });
 
-  // ESC pour fermer
+
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") setOpen(false);
   });
