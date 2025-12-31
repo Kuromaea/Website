@@ -791,6 +791,14 @@ if (scrollIndicator) {
     window.addEventListener("load", applyFooterMode);
     window.addEventListener("resize", applyFooterMode);
 
+    // Home page: keep header/footer fixed (no hide/show animation)
+    if (document.body.classList.contains("no-scroll-page")) {
+      if (header) gsap.set(header, { yPercent: 0, clearProps: "transform" });
+      if (footer) gsap.set(footer, { bottom: 0 });
+      return;
+    }
+
+
     if (header) {
       gsap.set(header, { yPercent: 0, willChange: "transform" });
     }
