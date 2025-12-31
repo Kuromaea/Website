@@ -634,7 +634,6 @@ if (scrollIndicator) {
   });
 })();
 
-
 // ===============================
 // GSAP CURSOR TRACKING (responsive-safe)
 // ===============================
@@ -930,3 +929,5 @@ if (scrollIndicator) {
     if (e.key === "Escape") setOpen(false);
   });
 })();
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrambleTextPlugin.min.js"></script>
