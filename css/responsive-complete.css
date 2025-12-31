@@ -562,7 +562,7 @@ body>main:not(.main-container) .splitText-container.corner-box {
 }
 
 body>main:not(.main-container) .splitText-container .line {
-    font-size: var(--fs-100);
+    /* font-size: var(--fs-100); */
     letter-spacing: -12px;
     line-height: 0.9;
     letter-spacing: 0.02em;
